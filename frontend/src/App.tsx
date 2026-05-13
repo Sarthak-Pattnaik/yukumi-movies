@@ -7,12 +7,13 @@ import {
 import { useEffect } from "react";
 
 import useAuthStore from "./store/authStore";
-
+import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-
+import Search from "./pages/Search";
+import MovieDetails from "./pages/MovieDetails";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -25,7 +26,7 @@ function App() {
 
   return (
     <BrowserRouter>
-
+      <Navbar />
       <Routes>
 
         <Route
@@ -50,6 +51,16 @@ function App() {
               <Profile />
             </ProtectedRoute>
           }
+        />
+
+        <Route
+          path="/search"
+          element={<Search />}
+        />
+
+        <Route
+          path="/movies/:id"
+          element={<MovieDetails />}
         />
 
       </Routes>
