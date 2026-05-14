@@ -42,6 +42,37 @@ const MovieDetails = () => {
     return <h1>Loading...</h1>;
   }
 
+  const handleAddToList =
+    async () => {
+
+      try {
+
+        await api.post(
+          "/movies/list",
+          {
+            movieId: movie.id,
+
+            status:
+              "plan_to_watch",
+
+            rating: 8,
+          }
+        );
+
+        alert(
+          "Movie added to list"
+        );
+
+      } catch (error) {
+
+        console.log(error);
+
+        alert(
+          "Failed to add movie"
+        );
+      }
+    };
+
   return (
 
     <div>
@@ -54,6 +85,10 @@ const MovieDetails = () => {
         src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
         alt={movie.title}
       />
+
+      <button onClick={handleAddToList}>
+        Add To List
+      </button>
 
       <p>
         {movie.overview}
