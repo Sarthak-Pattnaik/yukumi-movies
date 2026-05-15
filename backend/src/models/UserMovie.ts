@@ -38,6 +38,12 @@ const userMovieSchema =
       max: 10,
     },
 
+    favorite: {
+      type: Boolean,
+
+      default: false,
+    },
+
     createdAt: {
       type: Date,
 

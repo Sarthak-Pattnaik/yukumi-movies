@@ -7,6 +7,188 @@ import useAuthStore from "../store/authStore";
 
 import api from "../services/api";
 
+
+const MovieCard = ({
+  movie,
+  refreshMovies,
+}: any) => {
+
+  const [status, setStatus] =
+    useState(movie.status);
+
+  const [rating, setRating] =
+    useState(movie.rating);
+
+  const [favorite, setFavorite] =
+    useState(movie.favorite);
+
+  const handleUpdate =
+    async () => {
+
+      try {
+
+        await api.patch(
+
+          `/movies/list/${movie._id}`,
+
+          {
+            status,
+            rating,
+            favorite,
+          }
+        );
+
+        alert(
+          "Movie updated"
+        );
+
+        refreshMovies();
+
+      } catch (error) {
+
+        console.log(error);
+
+        alert(
+          "Update failed"
+        );
+      }
+    };
+
+  const handleDelete =
+    async () => {
+
+      try {
+
+        await api.delete(
+          `/movies/list/${movie._id}`
+        );
+
+        alert(
+          "Movie removed"
+        );
+
+        refreshMovies();
+
+      } catch (error) {
+
+        console.log(error);
+
+        alert(
+          "Delete failed"
+        );
+      }
+    };
+
+  return (
+
+    <div
+      style={{
+        width: "220px",
+
+        border:
+          "1px solid gray",
+
+        padding: "10px",
+
+        borderRadius: "10px",
+      }}
+    >
+
+      <img
+        src={`https://image.tmdb.org/t/p/w200${movie.movie.poster_path}`}
+        alt={movie.movie.title}
+        style={{
+          width: "100%",
+        }}
+      />
+
+      <h3>
+        {movie.movie.title}
+      </h3>
+
+      <p>
+        {movie.movie.release_date}
+      </p>
+
+      <select
+        value={status}
+        onChange={(e) =>
+          setStatus(e.target.value)
+        }
+      >
+
+        <option value="watching">
+          Watching
+        </option>
+
+        <option value="completed">
+          Completed
+        </option>
+
+        <option value="plan_to_watch">
+          Plan To Watch
+        </option>
+
+        <option value="dropped">
+          Dropped
+        </option>
+
+      </select>
+
+      <br />
+      <br />
+
+      <input
+        type="number"
+        min="1"
+        max="10"
+        value={rating}
+        onChange={(e) =>
+          setRating(
+            Number(e.target.value)
+          )
+        }
+      />
+
+      <br />
+      <br />
+
+      <label>
+
+        <input
+          type="checkbox"
+          checked={favorite}
+          onChange={(e) =>
+            setFavorite(
+              e.target.checked
+            )
+          }
+        />
+
+        Favorite
+
+      </label>
+
+      <br />
+      <br />
+
+      <button onClick={handleUpdate}>
+        Save
+      </button>
+
+      <button
+        onClick={handleDelete}
+        style={{
+          marginTop: "10px",
+        }}
+      >
+        Remove
+      </button>
+
+    </div>
+  );
+};
+
 const Profile = () => {
 
   const { user } =
@@ -15,29 +197,62 @@ const Profile = () => {
   const [movies, setMovies] =
     useState<any[]>([]);
 
+  const fetchMovies =
+    async () => {
+
+      try {
+
+        const res =
+          await api.get(
+            "/movies/user/list"
+          );
+
+        setMovies(res.data);
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
   useEffect(() => {
-
-    const fetchMovies =
-      async () => {
-
-        try {
-
-          const res =
-            await api.get(
-              "/movies/user/list"
-            );
-
-          setMovies(res.data);
-
-        } catch (error) {
-
-          console.log(error);
-        }
-      };
 
     fetchMovies();
 
   }, []);
+
+  const completedMovies =
+    movies.filter(
+      (movie) =>
+        movie.status ===
+        "completed"
+    );
+
+  const watchingMovies =
+    movies.filter(
+      (movie) =>
+        movie.status ===
+        "watching"
+    );
+
+  const plannedMovies =
+    movies.filter(
+      (movie) =>
+        movie.status ===
+        "plan_to_watch"
+    );
+
+  const droppedMovies =
+    movies.filter(
+      (movie) =>
+        movie.status ===
+        "dropped"
+    );
+
+  const favoriteMovies =
+    movies.filter(
+      (movie) => movie.favorite
+    );
 
   return (
 
@@ -57,49 +272,137 @@ const Profile = () => {
 
       <hr />
 
+      <h2>Favorites</h2>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          flexWrap: "wrap",
+        }}
+      >
+
+        {favoriteMovies.map(
+          (movie) => (
+
+            <MovieCard
+              key={movie._id}
+              movie={movie}
+              refreshMovies={fetchMovies}
+            />
+
+          )
+        )}
+
+      </div>
+
       <h2>
         Your Movie List
       </h2>
 
-      {movies.map((movie) => (
+      <hr />
 
-        <div
-          key={movie._id}
-          style={{
-            marginTop: "20px",
+      <h2>Completed</h2>
 
-            border: "1px solid gray",
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          flexWrap: "wrap",
+        }}
+      >
 
-            padding: "20px",
-          }}
-        >
+        {completedMovies.map(
+          (movie) => (
 
-          <img
-            src={`https://image.tmdb.org/t/p/w200${movie.movie.poster_path}`}
-            alt={movie.movie.title}
-          />
+            <MovieCard
+              key={movie._id}
+              movie={movie}
+              refreshMovies={fetchMovies}
+            />
 
-          <h2>
-            {movie.movie.title}
-          </h2>
+          )
+        )}
 
-          <p>
-            {movie.movie.release_date}
-          </p>
+      </div>
 
-          <p>
-            Status:
-            {movie.status}
-          </p>
+      <hr />
 
-          <p>
-            Your Rating:
-            {movie.rating}
-          </p>
+      <h2>Watching</h2>
 
-        </div>
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          flexWrap: "wrap",
+        }}
+      >
 
-      ))}
+        {watchingMovies.map(
+          (movie) => (
+
+            <MovieCard
+              key={movie._id}
+              movie={movie}
+              refreshMovies={fetchMovies}
+            />
+
+          )
+        )}
+
+      </div>
+
+      <hr />
+
+      <h2>Plan To Watch</h2>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          flexWrap: "wrap",
+        }}
+      >
+
+        {plannedMovies.map(
+          (movie) => (
+
+            <MovieCard
+              key={movie._id}
+              movie={movie}
+              refreshMovies={fetchMovies}
+            />
+
+          )
+        )}
+
+      </div>
+
+      <hr />
+
+      <h2>Dropped</h2>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          flexWrap: "wrap",
+        }}
+      >
+
+        {droppedMovies.map(
+          (movie) => (
+
+            <MovieCard
+              key={movie._id}
+              movie={movie}
+              refreshMovies={fetchMovies}
+            />
+
+          )
+        )}
+
+      </div>
 
     </div>
   );
