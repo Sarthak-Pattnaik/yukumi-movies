@@ -197,6 +197,9 @@ const Profile = () => {
   const [movies, setMovies] =
     useState<any[]>([]);
 
+  const [stats, setStats] =
+    useState<any>(null);
+
   const fetchMovies =
     async () => {
 
@@ -215,10 +218,27 @@ const Profile = () => {
       }
     };
 
+  const fetchStats =
+    async () => {
+
+      try {
+
+        const res =
+          await api.get(
+            "/movies/stats/user"
+          );
+
+        setStats(res.data);
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
   useEffect(() => {
-
     fetchMovies();
-
+    fetchStats();
   }, []);
 
   const completedMovies =
@@ -269,6 +289,110 @@ const Profile = () => {
         Email:
         {user?.email}
       </h2>
+
+      {stats && (
+
+  <>
+
+    <hr />
+
+    <h2>
+      Statistics
+    </h2>
+
+    <div
+      style={{
+        display: "flex",
+        gap: "20px",
+        flexWrap: "wrap",
+      }}
+    >
+
+      <div>
+        <h3>
+          Total Movies
+        </h3>
+
+        <p>
+          {stats.totalMovies}
+        </p>
+      </div>
+
+      <div>
+        <h3>
+          Completed
+        </h3>
+
+        <p>
+          {stats.completedMovies}
+        </p>
+      </div>
+
+      <div>
+        <h3>
+          Watching
+        </h3>
+
+        <p>
+          {stats.watchingMovies}
+        </p>
+      </div>
+
+      <div>
+        <h3>
+          Planned
+        </h3>
+
+        <p>
+          {stats.plannedMovies}
+        </p>
+      </div>
+
+      <div>
+        <h3>
+          Dropped
+        </h3>
+
+        <p>
+          {stats.droppedMovies}
+        </p>
+      </div>
+
+      <div>
+        <h3>
+          Favorites
+        </h3>
+
+        <p>
+          {stats.favoriteMovies}
+        </p>
+      </div>
+
+      <div>
+        <h3>
+          Reviews
+        </h3>
+
+        <p>
+          {stats.totalReviews}
+        </p>
+      </div>
+
+      <div>
+        <h3>
+          Average Rating
+        </h3>
+
+        <p>
+          {stats.averageRating}
+        </p>
+      </div>
+
+    </div>
+
+  </>
+
+)}
 
       <hr />
 

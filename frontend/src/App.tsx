@@ -14,6 +14,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import MovieDetails from "./pages/MovieDetails";
+import UserProfile from "./pages/UserProfile";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -61,6 +62,11 @@ function App() {
         <Route
           path="/movies/:id"
           element={<MovieDetails />}
+        />
+
+        <Route
+          path="/users/:id"
+          element={<UserProfile />}
         />
 
       </Routes>

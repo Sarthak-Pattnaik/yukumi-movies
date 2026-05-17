@@ -11,6 +11,8 @@ import {
   getMovieReviewsController,
   updateReviewController,
   deleteReviewController,
+  getUserStatsController,
+  toggleReviewLikeController
 } from "../controllers/movieController";
 
 import protect from "../middleware/authMiddleware";
@@ -67,6 +69,18 @@ router.delete(
   "/reviews/:id",
   protect,
   deleteReviewController
+);
+
+router.patch(
+  "/reviews/like/:id",
+  protect,
+  toggleReviewLikeController
+);
+
+router.get(
+  "/stats/user",
+  protect,
+  getUserStatsController
 );
 
 router.get(

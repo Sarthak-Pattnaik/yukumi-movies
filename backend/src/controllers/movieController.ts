@@ -340,8 +340,29 @@ export const getMovieReviewsController =
           "username"
         );
 
+      const formattedReviews =
+        reviews.map((review) => ({
+
+          _id: review._id,
+
+          reviewText:
+            review.reviewText,
+
+          createdAt:
+            review.createdAt,
+
+          likes:
+            review.likes,
+
+          likeCount:
+            review.likes.length,
+
+          userId:
+            review.userId,
+        }));
+
       res.status(200).json(
-        reviews
+        formattedReviews
       );
 
     } catch (error) {
@@ -440,6 +461,180 @@ export const deleteReviewController =
       res.status(200).json({
         message:
           "Review deleted",
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server error",
+      });
+
+    }
+  };
+
+export const getUserStatsController =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+
+    try {
+
+      const userMovies =
+        await UserMovie.find({
+          userId: req.userId,
+        });
+
+      const reviews =
+        await Review.find({
+          userId: req.userId,
+        });
+
+      const totalMovies =
+        userMovies.length;
+
+      const completedMovies =
+        userMovies.filter(
+          (movie) =>
+            movie.status ===
+            "completed"
+        ).length;
+
+      const watchingMovies =
+        userMovies.filter(
+          (movie) =>
+            movie.status ===
+            "watching"
+        ).length;
+
+      const plannedMovies =
+        userMovies.filter(
+          (movie) =>
+            movie.status ===
+            "plan_to_watch"
+        ).length;
+
+      const droppedMovies =
+        userMovies.filter(
+          (movie) =>
+            movie.status ===
+            "dropped"
+        ).length;
+
+      const favoriteMovies =
+        userMovies.filter(
+          (movie) =>
+            movie.favorite
+        ).length;
+
+      const ratedMovies =
+        userMovies.filter(
+          (movie) =>
+            movie.rating
+        );
+
+      const averageRating =
+        ratedMovies.length > 0
+
+          ? (
+            ratedMovies.reduce(
+              (
+                acc,
+                movie
+              ) =>
+                acc + (movie.rating || 0),
+              0
+            ) / ratedMovies.length
+          ).toFixed(1)
+
+          : 0;
+
+      res.status(200).json({
+
+        totalMovies,
+
+        completedMovies,
+
+        watchingMovies,
+
+        plannedMovies,
+
+        droppedMovies,
+
+        favoriteMovies,
+
+        totalReviews:
+          reviews.length,
+
+        averageRating,
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server error",
+      });
+
+    }
+  };
+
+export const toggleReviewLikeController =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+
+    try {
+
+      const { id } = req.params;
+
+      const review =
+        await Review.findById(id);
+
+      if (!review) {
+
+        return res.status(404).json({
+          message:
+            "Review not found",
+        });
+      }
+
+      const alreadyLiked =
+        review.likes.some(
+          (userId) =>
+            userId.toString() ===
+            req.userId
+        );
+
+      if (alreadyLiked) {
+
+        review.likes =
+          review.likes.filter(
+            (userId) =>
+              userId.toString() !==
+              req.userId
+          );
+
+      } else {
+
+        review.likes.push(
+          req.userId as any
+        );
+      }
+
+      await review.save();
+
+      res.status(200).json({
+
+        liked:
+          !alreadyLiked,
+
+        likeCount:
+          review.likes.length,
       });
 
     } catch (error) {

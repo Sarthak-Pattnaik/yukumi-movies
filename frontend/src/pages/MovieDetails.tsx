@@ -63,6 +63,23 @@ const ReviewCard = ({
       }
     };
 
+  const handleLike =
+    async () => {
+
+      try {
+
+        await api.patch(
+          `/movies/reviews/like/${review._id}`
+        );
+
+        fetchReviews();
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
   return (
 
     <div
@@ -118,6 +135,12 @@ const ReviewCard = ({
 
       )}
 
+      <button
+        onClick={handleLike}
+      >
+        👍 {review.likeCount}
+      </button>
+      
       <button
         onClick={() =>
           setEditing(
@@ -316,13 +339,13 @@ const MovieDetails = () => {
 
       {reviews.map((review) => (
 
-  <ReviewCard
-    key={review._id}
-    review={review}
-    fetchReviews={fetchReviews}
-  />
+        <ReviewCard
+          key={review._id}
+          review={review}
+          fetchReviews={fetchReviews}
+        />
 
-))}
+      ))}
 
     </div>
   );

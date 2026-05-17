@@ -141,3 +141,143 @@ export const logoutUser = async (
     message: "Logged out successfully",
   });
 };
+
+export const toggleFollowController =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+
+    try {
+
+      const currentUserId =
+        req.userId;
+
+      const targetUserId =
+        req.params.id;
+
+      if (
+        currentUserId ===
+        targetUserId
+      ) {
+
+        return res.status(400).json({
+          message:
+            "Cannot follow yourself",
+        });
+      }
+
+      const currentUser =
+        await User.findById(
+          currentUserId
+        );
+
+      const targetUser =
+        await User.findById(
+          targetUserId
+        );
+
+      if (
+        !currentUser ||
+        !targetUser
+      ) {
+
+        return res.status(404).json({
+          message:
+            "User not found",
+        });
+      }
+
+      const alreadyFollowing =
+        currentUser.following.some(
+          (id) =>
+            id.toString() ===
+            targetUserId
+        );
+
+      if (alreadyFollowing) {
+
+        currentUser.following =
+          currentUser.following.filter(
+            (id) =>
+              id.toString() !==
+              targetUserId
+          );
+
+        targetUser.followers =
+          targetUser.followers.filter(
+            (id) =>
+              id.toString() !==
+              currentUserId
+          );
+
+      } else {
+
+        currentUser.following.push(
+          targetUserId as any
+        );
+
+        targetUser.followers.push(
+          currentUserId as any
+        );
+      }
+
+      await currentUser.save();
+
+      await targetUser.save();
+
+      res.status(200).json({
+
+        following:
+          !alreadyFollowing,
+
+        followersCount:
+          targetUser.followers.length,
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server error",
+      });
+
+    }
+  };
+
+export const getUserProfileController =
+  async (
+    req: Request,
+    res: Response
+  ) => {
+
+    try {
+
+      const user =
+        await User.findById(
+          req.params.id
+        ).select(
+          "-password"
+        );
+
+      if (!user) {
+
+        return res.status(404).json({
+          message:
+            "User not found",
+        });
+      }
+
+      res.status(200).json(user);
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server error",
+      });
+
+    }
+  };
