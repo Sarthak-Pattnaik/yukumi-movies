@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 import User from "../models/User";
+import Notification from "../models/Notification";
 
 export const registerUser = async (
   req: Request,
@@ -154,7 +155,7 @@ export const toggleFollowController =
         req.userId;
 
       const targetUserId =
-        req.params.id;
+        req.params.id as string;
 
       if (
         currentUserId ===
@@ -235,6 +236,17 @@ export const toggleFollowController =
           targetUser.followers.length,
       });
 
+      await Notification.create({
+
+        recipientId:
+          targetUserId,
+
+        senderId:
+          currentUserId,
+
+        type: "follow",
+      });
+
     } catch (error) {
 
       console.log(error);
@@ -270,6 +282,45 @@ export const getUserProfileController =
       }
 
       res.status(200).json(user);
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server error",
+      });
+
+    }
+  };
+
+export const getNotificationsController =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+
+    try {
+
+      const notifications =
+        await Notification.find({
+
+          recipientId:
+            req.userId,
+        })
+
+          .sort({
+            createdAt: -1,
+          })
+
+          .populate(
+            "senderId",
+            "username"
+          );
+
+      res.status(200).json(
+        notifications
+      );
 
     } catch (error) {
 

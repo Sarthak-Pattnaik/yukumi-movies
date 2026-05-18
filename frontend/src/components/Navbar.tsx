@@ -27,6 +27,10 @@ const Navbar = () => {
         Home
       </Link>
 
+      <Link to="/feed">
+        Feed
+      </Link>
+
       <Link to="/search">
         Search
       </Link>
@@ -64,6 +68,10 @@ const Navbar = () => {
         </>
 
       )}
+
+      <Link to="/notifications">
+        Notifications
+      </Link>
 
     </nav>
   );

@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import { getMovieDetails, searchMovies } from "../services/tmdbService";
+import User from "../models/User";
 import UserMovie from "../models/UserMovie";
 import Review from "../models/Review";
+import Activity from "../models/Activity";
+import Notification from "../models/Notification";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 
@@ -230,6 +233,32 @@ export const updateUserMovieController =
         updatedMovie
       );
 
+      if (status === "completed") {
+
+        await Activity.create({
+
+          userId: req.userId,
+
+          type: "completed",
+
+          movieId:
+            updatedMovie.movieId,
+        });
+      }
+
+      if (favorite) {
+
+        await Activity.create({
+
+          userId: req.userId,
+
+          type: "favorite",
+
+          movieId:
+            updatedMovie.movieId,
+        });
+      }
+
     } catch (error) {
 
       console.log(error);
@@ -309,6 +338,17 @@ export const addReviewController =
       res.status(201).json(
         review
       );
+
+      await Activity.create({
+
+        userId: req.userId,
+
+        type: "review",
+
+        movieId,
+
+        text: reviewText,
+      });
 
     } catch (error) {
 
@@ -636,6 +676,118 @@ export const toggleReviewLikeController =
         likeCount:
           review.likes.length,
       });
+
+      if (
+        review.userId.toString() !==
+        req.userId
+      ) {
+
+        await Notification.create({
+
+          recipientId:
+            review.userId,
+
+          senderId:
+            req.userId,
+
+          type: "like",
+
+          reviewId:
+            review._id,
+        });
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server error",
+      });
+
+    }
+  };
+
+export const getFeedController =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+
+    try {
+
+      const user =
+        await User.findById(
+          req.userId
+        );
+
+      if (!user) {
+
+        return res.status(404).json({
+          message:
+            "User not found",
+        });
+      }
+
+      const feed =
+        await Activity.find({
+
+          userId: {
+            $in:
+              user.following,
+          },
+        })
+
+          .sort({
+            createdAt: -1,
+          })
+
+          .limit(50)
+
+          .populate(
+            "userId",
+            "username"
+          );
+
+      const enrichedFeed =
+        await Promise.all(
+
+          feed.map(
+            async (activity) => {
+
+              let movie = null;
+
+              if (activity.movieId) {
+
+                movie =
+                  await getMovieDetails(
+                    activity.movieId.toString()
+                  );
+              }
+
+              return {
+
+                _id: activity._id,
+
+                type: activity.type,
+
+                text: activity.text,
+
+                createdAt:
+                  activity.createdAt,
+
+                movie,
+
+                user:
+                  activity.userId,
+              };
+            }
+          )
+        );
+
+      res.status(200).json(
+        enrichedFeed
+      );
 
     } catch (error) {
 

@@ -15,6 +15,8 @@ import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import MovieDetails from "./pages/MovieDetails";
 import UserProfile from "./pages/UserProfile";
+import Notifications from "./pages/Notifications";
+import Feed from "./pages/Feed";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -67,6 +69,16 @@ function App() {
         <Route
           path="/users/:id"
           element={<UserProfile />}
+        />
+
+        <Route
+          path="/feed"
+          element={<Feed />}
+        />
+
+        <Route
+          path="/notifications"
+          element={<Notifications />}
         />
 
       </Routes>

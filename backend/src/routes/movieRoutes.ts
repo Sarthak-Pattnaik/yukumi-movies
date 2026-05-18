@@ -12,7 +12,8 @@ import {
   updateReviewController,
   deleteReviewController,
   getUserStatsController,
-  toggleReviewLikeController
+  toggleReviewLikeController,
+  getFeedController
 } from "../controllers/movieController";
 
 import protect from "../middleware/authMiddleware";
@@ -81,6 +82,12 @@ router.get(
   "/stats/user",
   protect,
   getUserStatsController
+);
+
+router.get(
+  "/feed/activity",
+  protect,
+  getFeedController
 );
 
 router.get(
