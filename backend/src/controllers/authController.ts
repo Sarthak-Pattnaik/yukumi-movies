@@ -332,3 +332,48 @@ export const getNotificationsController =
 
     }
   };
+
+export const updateProfileController =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+
+    try {
+
+      const {
+        avatar,
+        tagline,
+        bio,
+      } = req.body;
+
+      const updatedUser =
+        await User.findByIdAndUpdate(
+
+          req.userId,
+
+          {
+            avatar,
+            tagline,
+            bio,
+          },
+
+          {
+            new: true,
+          }
+        ).select("-password");
+
+      res.status(200).json(
+        updatedUser
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server error",
+      });
+
+    }
+  };

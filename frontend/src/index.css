@@ -8,7 +8,7 @@
 :root {
 
   font-family:
-    "Geist Sans",
+    "Geist Variable",
     sans-serif;
 
   color: white;
@@ -16,13 +16,19 @@
   background-color: #0f0f0f;
 
   --background:
-    oklch(1 0 0);
+    #0f0f0f;
+
+  --card:
+    #171717;
+
+  --surface:
+    #1f1f1f;
+
+  --emerald:
+    #10b981;
 
   --foreground:
     oklch(0.145 0 0);
-
-  --card:
-    oklch(1 0 0);
 
   --card-foreground:
     oklch(0.145 0 0);
@@ -112,6 +118,10 @@
     oklch(0.708 0 0);
 }
 
+html{
+  scroll-behavior: smooth;
+}
+
 body {
 
   margin: 0;
@@ -120,7 +130,14 @@ body {
 
   min-height: 100vh;
 
-  background: #0f0f0f;
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(16,185,129,0.08),
+      transparent 25%
+    ),
+
+    #0f0f0f;
 
   color: white;
 }
@@ -140,6 +157,10 @@ a {
 button {
 
   cursor: pointer;
+}
+
+code, pre, .font-mono {
+  font-family: "Geist Mono Variable", monospace;
 }
 
 @theme inline {
@@ -387,4 +408,161 @@ button {
 @utility section-spacing {
 
   padding-block: 4rem;
+}
+
+@utility emerald-button {
+
+  background-color:
+    var(--emerald);
+  
+  @apply
+    rounded-xl
+    px-5
+    py-2
+    font-medium
+    text-black
+    transition-all
+    duration-300
+    hover:scale-[1.03];
+  
+  &:hover {
+
+  box-shadow:
+    0 0 20px
+    rgba(16,185,129,0.25);
+}
+}
+
+@utility content-grid {
+
+  display: grid;
+
+  gap: 2rem;
+}
+
+::selection {
+
+  background:
+    rgba(16,185,129,0.3);
+
+  color: white;
+}
+
+@utility movie-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(220px, 1fr)
+    );
+
+  gap: 1.75rem;
+}
+
+input {
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+input:focus {
+
+  box-shadow:
+    0 0 0 3px
+    rgba(16,185,129,0.15);
+}
+
+@keyframes fadeIn {
+
+  from {
+
+    opacity: 0;
+
+    transform:
+      translateY(10px);
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform:
+      translateY(0);
+  }
+}
+
+@keyframes floatSlow {
+
+  0% {
+
+    transform:
+      translateY(0px);
+  }
+
+  50% {
+
+    transform:
+      translateY(-6px);
+  }
+
+  100% {
+
+    transform:
+      translateY(0px);
+  }
+}
+
+.profile-glow {
+
+  position: relative;
+}
+
+.profile-glow::before {
+
+  content: "";
+
+  position: absolute;
+
+  inset: -1px;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(16,185,129,0.15),
+      transparent 40%
+    );
+
+  pointer-events: none;
+}
+
+@utility auth-input {
+
+  @apply
+    h-14
+    w-full
+    rounded-2xl
+    border
+    border-zinc-700
+    bg-black/40
+    px-5
+    text-white
+    outline-none
+    transition-all
+    duration-300
+    placeholder:text-zinc-500;
+
+  &:focus {
+
+    border-color:
+      #10b981;
+
+    box-shadow:
+      0 0 0 3px
+      rgba(16,185,129,0.15);
+  }
 }

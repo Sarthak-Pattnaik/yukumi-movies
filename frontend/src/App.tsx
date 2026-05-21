@@ -7,7 +7,7 @@ import {
 import { useEffect } from "react";
 
 import useAuthStore from "./store/authStore";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/layout/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,8 +16,8 @@ import Search from "./pages/Search";
 import MovieDetails from "./pages/MovieDetails";
 import UserProfile from "./pages/UserProfile";
 import Notifications from "./pages/Notifications";
-import Feed from "./pages/Feed";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import Community from "./pages/Community";
 
 function App() {
 
@@ -72,8 +72,8 @@ function App() {
         />
 
         <Route
-          path="/feed"
-          element={<Feed />}
+          path="/community"
+          element={<Community />}
         />
 
         <Route

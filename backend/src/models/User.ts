@@ -45,6 +45,20 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  tagline: {
+    type: String,
+
+    default:
+      "Movie Enthusiast",
+  },
+
+  bio: {
+    type: String,
+
+    default:
+      "Tracking films, writing reviews, and building a cinematic journey.",
+  },
 });
 
 const User = mongoose.model("User", userSchema);

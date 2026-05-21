@@ -1,8 +1,12 @@
 import { useState } from "react";
 
 import useAuthStore from "../store/authStore";
+import AuthLayout from "../components/layout/AuthLayout";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
+
+  const navigate = useNavigate();
 
   const [email, setEmail] =
     useState("");
@@ -23,45 +27,94 @@ const Login = () => {
       email,
       password
     );
+
+    navigate("/profile");
   };
 
   return (
 
-    <div>
+    <AuthLayout
 
-      <h1>Login</h1>
+      title="Welcome Back"
 
-      <form onSubmit={handleLogin}>
+      subtitle="
+    Continue tracking films,
+    reviewing movies,
+    and exploring the community.
+  "
+    >
+
+      <form
+        onSubmit={handleLogin}
+
+        className="space-y-5"
+      >
 
         <input
           type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-        />
 
-        <br />
+          placeholder="Email"
+
+          value={email}
+
+          onChange={(e) =>
+            setEmail(
+              e.target.value
+            )
+          }
+
+          className="auth-input"
+        />
 
         <input
           type="password"
+
           placeholder="Password"
+
           value={password}
+
           onChange={(e) =>
-            setPassword(e.target.value)
+            setPassword(
+              e.target.value
+            )
           }
+
+          className="auth-input"
         />
 
-        <br />
+        <button
+          type="submit"
 
-        <button type="submit">
+          className="emerald-button h-14 w-full text-lg font-semibold"
+        >
+
           Login
+
         </button>
 
       </form>
 
-    </div>
+      <p
+          className="pt-4 text-center text-zinc-500"
+        >
+
+          Don't have an account?
+
+          {" "}
+
+          <Link
+            to="/register"
+
+            className="text-[#10b981] transition-colors hover:text-white"
+          >
+
+            Register
+
+          </Link>
+
+        </p>
+
+    </AuthLayout>
   );
 };
 

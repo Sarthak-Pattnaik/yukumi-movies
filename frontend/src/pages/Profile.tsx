@@ -3,202 +3,100 @@ import {
   useState,
 } from "react";
 
-import useAuthStore from "../store/authStore";
+import PageWrapper
+  from "../components/layout/PageWrapper";
+
+import SectionTitle
+  from "../components/layout/SectionTitle";
+
+import StatCard
+  from "../components/profile/StatCard";
+
+import MovieCard
+  from "../components/movie/MovieCard";
 
 import api from "../services/api";
 
 
-const MovieCard = ({
-  movie,
-  refreshMovies,
-}: any) => {
-
-  const [status, setStatus] =
-    useState(movie.status);
-
-  const [rating, setRating] =
-    useState(movie.rating);
-
-  const [favorite, setFavorite] =
-    useState(movie.favorite);
-
-  const handleUpdate =
-    async () => {
-
-      try {
-
-        await api.patch(
-
-          `/movies/list/${movie._id}`,
-
-          {
-            status,
-            rating,
-            favorite,
-          }
-        );
-
-        alert(
-          "Movie updated"
-        );
-
-        refreshMovies();
-
-      } catch (error) {
-
-        console.log(error);
-
-        alert(
-          "Update failed"
-        );
-      }
-    };
-
-  const handleDelete =
-    async () => {
-
-      try {
-
-        await api.delete(
-          `/movies/list/${movie._id}`
-        );
-
-        alert(
-          "Movie removed"
-        );
-
-        refreshMovies();
-
-      } catch (error) {
-
-        console.log(error);
-
-        alert(
-          "Delete failed"
-        );
-      }
-    };
-
-  return (
-
-    <div
-      style={{
-        width: "220px",
-
-        border:
-          "1px solid gray",
-
-        padding: "10px",
-
-        borderRadius: "10px",
-      }}
-    >
-
-      <img
-        src={`https://image.tmdb.org/t/p/w200${movie.movie.poster_path}`}
-        alt={movie.movie.title}
-        style={{
-          width: "100%",
-        }}
-      />
-
-      <h3>
-        {movie.movie.title}
-      </h3>
-
-      <p>
-        {movie.movie.release_date}
-      </p>
-
-      <select
-        value={status}
-        onChange={(e) =>
-          setStatus(e.target.value)
-        }
-      >
-
-        <option value="watching">
-          Watching
-        </option>
-
-        <option value="completed">
-          Completed
-        </option>
-
-        <option value="plan_to_watch">
-          Plan To Watch
-        </option>
-
-        <option value="dropped">
-          Dropped
-        </option>
-
-      </select>
-
-      <br />
-      <br />
-
-      <input
-        type="number"
-        min="1"
-        max="10"
-        value={rating}
-        onChange={(e) =>
-          setRating(
-            Number(e.target.value)
-          )
-        }
-      />
-
-      <br />
-      <br />
-
-      <label>
-
-        <input
-          type="checkbox"
-          checked={favorite}
-          onChange={(e) =>
-            setFavorite(
-              e.target.checked
-            )
-          }
-        />
-
-        Favorite
-
-      </label>
-
-      <br />
-      <br />
-
-      <button onClick={handleUpdate}>
-        Save
-      </button>
-
-      <button
-        onClick={handleDelete}
-        style={{
-          marginTop: "10px",
-        }}
-      >
-        Remove
-      </button>
-
-    </div>
-  );
-};
 
 const Profile = () => {
 
-  const { user } =
-    useAuthStore();
+  const [user, setUser] =
+    useState<any>(null);
 
   const [movies, setMovies] =
     useState<any[]>([]);
 
   const [stats, setStats] =
     useState<any>(null);
+
+  const [avatar, setAvatar] =
+    useState("");
+
+  const [tagline, setTagline] =
+    useState("");
+
+  const [bio, setBio] =
+    useState("");
+
+  const [
+    showEditProfile,
+    setShowEditProfile,
+  ] = useState(false);
+
+  const fetchUser =
+    async () => {
+
+      try {
+
+        const res =
+          await api.get(
+            "/auth/me"
+          );
+
+        setUser(res.data);
+
+        setAvatar(
+          res.data.avatar || ""
+        );
+
+        setTagline(
+          res.data.tagline || ""
+        );
+
+        setBio(
+          res.data.bio || ""
+        );
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
+  const handleProfileUpdate =
+    async () => {
+
+      try {
+
+        const res =
+          await api.patch(
+            "/auth/profile/update",
+
+            {
+              avatar,
+              tagline,
+              bio,
+            }
+          );
+
+        setUser(res.data);
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
 
   const fetchMovies =
     async () => {
@@ -237,6 +135,7 @@ const Profile = () => {
     };
 
   useEffect(() => {
+    fetchUser();
     fetchMovies();
     fetchStats();
   }, []);
@@ -276,259 +175,412 @@ const Profile = () => {
 
   return (
 
-    <div>
+    <PageWrapper>
 
-      <h1>Profile Page</h1>
+      <section
+        className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-[#141414] px-10 py-16 "
+      >
 
-      <h2>
-        Username:
-        {user?.username}
-      </h2>
+        <div
+          className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.12),transparent_35%)]"
+        />
 
-      <h2>
-        Email:
-        {user?.email}
-      </h2>
+        <div
+          className="relative z-10 flex items-center gap-8"
+        >
+
+          <div className="flex h-48 w-48 items-center justify-center rounded-full bg-[#10b981]/15 text-5xl font-bold text-[#10b981] overflow-hidden">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.username}
+                className="h-full w-full rounded-full object-cover"
+              />
+            ) : (
+              user?.username?.[0]?.toUpperCase()
+            )}
+          </div>
+
+          <div>
+
+            <p
+              className="mb-3 text-sm font-semibold uppercase tracking-[0.3em] text-[#10b981]"
+            >
+
+              {user?.tagline}
+
+            </p>
+
+            <h1
+              className="mb-4 text-6xl font-bold tracking-tight"
+            >
+
+              {user?.username}
+
+            </h1>
+
+            <p
+              className="max-w-2xl text-lg leading-relaxed text-zinc-400"
+            >
+
+              {user?.bio}
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <div
+        className="mt-8 flex justify-end"
+      >
+
+        <button
+          onClick={() =>
+            setShowEditProfile(
+              !showEditProfile
+            )
+          }
+
+          className="rounded-2xl border border-zinc-700 bg-black/40 px-5 py-3 text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-[#10b981] hover:text-white"
+        >
+
+          {showEditProfile
+            ? "Close Editor"
+            : "Edit Profile"}
+
+        </button>
+
+      </div>
+
+      {showEditProfile && (
+        <section
+          className="mt-10 rounded-3xl border border-zinc-800 bg-[#171717]/80 p-8"
+        >
+
+          <div
+            className="mb-8 flex items-center justify-between"
+          >
+
+            <div>
+
+              <p
+                className="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-[#10b981]"
+              >
+
+                Personalize
+
+              </p>
+
+              <h2
+                className="text-3xl font-bold tracking-tight"
+              >
+
+                Edit Profile
+
+              </h2>
+
+            </div>
+
+          </div>
+          <div
+            className="space-y-5 grid gap-5"
+          >
+
+            <input
+              type="text"
+
+              placeholder="Avatar URL"
+
+              value={avatar}
+
+              onChange={(e) =>
+                setAvatar(
+                  e.target.value
+                )
+              }
+
+              className="w-full rounded-2xl border border-zinc-700 bg-black/40 p-4 text-zinc-200 outline-none transition-all duration-300 placeholder:text-zinc-500 focus:border-[#10b981] focus:bg-black/60"
+            />
+
+            <input
+              type="text"
+
+              placeholder="Tagline"
+
+              value={tagline}
+
+              onChange={(e) =>
+                setTagline(
+                  e.target.value
+                )
+              }
+
+              className="w-full rounded-2xl border border-zinc-700 bg-black/40 p-4 text-zinc-200 outline-none transition-all duration-300 placeholder:text-zinc-500 focus:border-[#10b981] focus:bg-black/60"
+            />
+
+            <textarea
+              rows={4}
+
+              placeholder="Bio"
+
+              value={bio}
+
+              onChange={(e) =>
+                setBio(
+                  e.target.value
+                )
+              }
+
+              className="w-full rounded-2xl border border-zinc-700 bg-black/40 p-4 text-zinc-200 outline-none transition-all duration-300 placeholder:text-zinc-500 focus:border-[#10b981] focus:bg-black/60"
+            />
+
+            <button
+              onClick={
+                handleProfileUpdate
+              }
+
+              className="emerald-button"
+            >
+
+              Save Profile
+
+            </button>
+
+          </div>
+
+        </section>
+      )}
 
       {stats && (
 
-  <>
+        <section
+          className="mt-16"
+        >
 
-    <hr />
+          <SectionTitle
+            title="Statistics"
+          />
 
-    <h2>
-      Statistics
-    </h2>
+          <div
+            className="grid grid-cols-2 gap-6 lg:grid-cols-4"
+          >
 
-    <div
-      style={{
-        display: "flex",
-        gap: "20px",
-        flexWrap: "wrap",
-      }}
-    >
-
-      <div>
-        <h3>
-          Total Movies
-        </h3>
-
-        <p>
-          {stats.totalMovies}
-        </p>
-      </div>
-
-      <div>
-        <h3>
-          Completed
-        </h3>
-
-        <p>
-          {stats.completedMovies}
-        </p>
-      </div>
-
-      <div>
-        <h3>
-          Watching
-        </h3>
-
-        <p>
-          {stats.watchingMovies}
-        </p>
-      </div>
-
-      <div>
-        <h3>
-          Planned
-        </h3>
-
-        <p>
-          {stats.plannedMovies}
-        </p>
-      </div>
-
-      <div>
-        <h3>
-          Dropped
-        </h3>
-
-        <p>
-          {stats.droppedMovies}
-        </p>
-      </div>
-
-      <div>
-        <h3>
-          Favorites
-        </h3>
-
-        <p>
-          {stats.favoriteMovies}
-        </p>
-      </div>
-
-      <div>
-        <h3>
-          Reviews
-        </h3>
-
-        <p>
-          {stats.totalReviews}
-        </p>
-      </div>
-
-      <div>
-        <h3>
-          Average Rating
-        </h3>
-
-        <p>
-          {stats.averageRating}
-        </p>
-      </div>
-
-    </div>
-
-  </>
-
-)}
-
-      <hr />
-
-      <h2>Favorites</h2>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          flexWrap: "wrap",
-        }}
-      >
-
-        {favoriteMovies.map(
-          (movie) => (
-
-            <MovieCard
-              key={movie._id}
-              movie={movie}
-              refreshMovies={fetchMovies}
+            <StatCard
+              label="Movies"
+              value={stats.totalMovies}
             />
 
-          )
-        )}
-
-      </div>
-
-      <h2>
-        Your Movie List
-      </h2>
-
-      <hr />
-
-      <h2>Completed</h2>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          flexWrap: "wrap",
-        }}
-      >
-
-        {completedMovies.map(
-          (movie) => (
-
-            <MovieCard
-              key={movie._id}
-              movie={movie}
-              refreshMovies={fetchMovies}
+            <StatCard
+              label="Completed"
+              value={stats.completedMovies}
             />
 
-          )
-        )}
-
-      </div>
-
-      <hr />
-
-      <h2>Watching</h2>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          flexWrap: "wrap",
-        }}
-      >
-
-        {watchingMovies.map(
-          (movie) => (
-
-            <MovieCard
-              key={movie._id}
-              movie={movie}
-              refreshMovies={fetchMovies}
+            <StatCard
+              label="Favorites"
+              value={stats.favoriteMovies}
             />
 
-          )
-        )}
-
-      </div>
-
-      <hr />
-
-      <h2>Plan To Watch</h2>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          flexWrap: "wrap",
-        }}
-      >
-
-        {plannedMovies.map(
-          (movie) => (
-
-            <MovieCard
-              key={movie._id}
-              movie={movie}
-              refreshMovies={fetchMovies}
+            <StatCard
+              label="Reviews"
+              value={stats.totalReviews}
             />
 
-          )
-        )}
-
-      </div>
-
-      <hr />
-
-      <h2>Dropped</h2>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          flexWrap: "wrap",
-        }}
-      >
-
-        {droppedMovies.map(
-          (movie) => (
-
-            <MovieCard
-              key={movie._id}
-              movie={movie}
-              refreshMovies={fetchMovies}
+            <StatCard
+              label="Watching"
+              value={stats.watchingMovies}
             />
 
-          )
-        )}
+            <StatCard
+              label="Planned"
+              value={stats.plannedMovies}
+            />
 
-      </div>
+            <StatCard
+              label="Dropped"
+              value={stats.droppedMovies}
+            />
 
-    </div>
+            <StatCard
+              label="Average"
+              value={stats.averageRating}
+            />
+
+          </div>
+
+        </section>
+
+      )}
+
+      <section
+        className="mt-20"
+      >
+
+        <SectionTitle
+          title="Favorites"
+        />
+
+        <div
+          className="movie-grid"
+        >
+
+          {favoriteMovies.map(
+            (movie) => (
+
+              <MovieCard
+                key={movie._id}
+                movie={movie.movie}
+              />
+
+            )
+          )}
+
+          {favoriteMovies.length === 0 && (
+            <p className="text-zinc-500">
+              No favorite movies yet.
+            </p>
+          )}
+
+        </div>
+
+      </section>
+
+
+      <section
+        className="mt-20"
+      >
+
+        <SectionTitle
+          title="Completed"
+        />
+
+        <div
+          className="movie-grid"
+        >
+
+          {completedMovies.map(
+            (movie) => (
+
+              <MovieCard
+                key={movie._id}
+                movie={movie.movie}
+              />
+
+            )
+          )}
+
+          {completedMovies.length === 0 && (
+            <p className="text-zinc-500">
+              No completed movies yet.
+            </p>
+          )}
+
+        </div>
+
+      </section>
+
+      <section
+        className="mt-20"
+      >
+
+        <SectionTitle
+          title="Watching"
+        />
+
+        <div
+          className="movie-grid"
+        >
+
+          {watchingMovies.map(
+            (movie) => (
+
+              <MovieCard
+                key={movie._id}
+                movie={movie.movie}
+              />
+
+            )
+          )}
+
+          {watchingMovies.length === 0 && (
+            <p className="text-zinc-500">
+              No movies currently watching.
+            </p>
+          )}
+
+        </div>
+
+      </section>
+
+      <section
+        className="mt-20"
+      >
+
+        <SectionTitle
+          title="Plan to Watch"
+        />
+
+        <div
+          className="movie-grid"
+        >
+
+          {plannedMovies.map(
+            (movie) => (
+
+              <MovieCard
+                key={movie._id}
+                movie={movie.movie}
+              />
+
+            )
+          )}
+
+          {plannedMovies.length === 0 && (
+            <p className="text-zinc-500">
+              No planned movies yet.
+            </p>
+          )}
+
+        </div>
+
+      </section>
+
+      <section
+        className="mt-20"
+      >
+
+        <SectionTitle
+          title="Dropped"
+        />
+
+        <div
+          className="movie-grid"
+        >
+
+          {droppedMovies.map(
+            (movie) => (
+
+              <MovieCard
+                key={movie._id}
+                movie={movie.movie}
+              />
+
+            )
+          )}
+
+          {droppedMovies.length === 0 && (
+            <p className="text-zinc-500">
+              No dropped movies yet.
+            </p>
+          )}
+
+        </div>
+
+      </section>
+
+    </PageWrapper>
   );
 };
 

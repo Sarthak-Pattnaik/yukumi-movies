@@ -13,7 +13,7 @@ import {
   deleteReviewController,
   getUserStatsController,
   toggleReviewLikeController,
-  getFeedController
+  getCommunityController
 } from "../controllers/movieController";
 
 import protect from "../middleware/authMiddleware";
@@ -85,9 +85,9 @@ router.get(
 );
 
 router.get(
-  "/feed/activity",
+  "/community/activity",
   protect,
-  getFeedController
+  getCommunityController
 );
 
 router.get(

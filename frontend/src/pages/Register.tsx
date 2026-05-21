@@ -1,6 +1,9 @@
 import { useState } from "react";
 
+import AuthLayout
+  from "../components/layout/AuthLayout";
 import api from "../services/api";
+import { Link, useNavigate } from "react-router-dom";
 
 const Register = () => {
 
@@ -12,6 +15,8 @@ const Register = () => {
 
   const [password, setPassword] =
     useState("");
+
+  const navigate = useNavigate();
 
   const handleRegister = async (
     e: React.FormEvent
@@ -33,6 +38,7 @@ const Register = () => {
       console.log(res.data);
 
       alert("User registered");
+      navigate("/profile");
 
     } catch (error: any) {
 
@@ -45,52 +51,104 @@ const Register = () => {
 
   return (
 
-    <div>
+    <AuthLayout
 
-      <h1>Register</h1>
+      title="Create Account"
 
-      <form onSubmit={handleRegister}>
+      subtitle="
+    Join the cinematic community
+    and start building your
+    movie journey.
+  "
+    >
+
+      <form
+        onSubmit={handleRegister}
+
+        className="space-y-5"
+      >
 
         <input
           type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) =>
-            setUsername(e.target.value)
-          }
-        />
 
-        <br />
+          placeholder="Username"
+
+          value={username}
+
+          onChange={(e) =>
+            setUsername(
+              e.target.value
+            )
+          }
+
+          className="auth-input"
+        />
 
         <input
           type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-        />
 
-        <br />
+          placeholder="Email"
+
+          value={email}
+
+          onChange={(e) =>
+            setEmail(
+              e.target.value
+            )
+          }
+
+          className="auth-input"
+        />
 
         <input
           type="password"
+
           placeholder="Password"
+
           value={password}
+
           onChange={(e) =>
-            setPassword(e.target.value)
+            setPassword(
+              e.target.value
+            )
           }
+
+          className="auth-input"
         />
 
-        <br />
+        <button
+          type="submit"
 
-        <button type="submit">
-          Register
+          className="emerald-button h-14 w-full text-lg font-semibold"
+        >
+
+          Create Account
+
         </button>
+
+        <p
+          className="pt-4 text-center text-zinc-500"
+        >
+
+          Already have an account?
+
+          {" "}
+
+          <Link
+            to="/login"
+
+            className="text-[#10b981] transition-colors hover:text-white"
+          >
+
+            Login
+
+          </Link>
+
+        </p>
 
       </form>
 
-    </div>
+    </AuthLayout>
   );
 };
 

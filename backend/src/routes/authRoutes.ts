@@ -9,7 +9,8 @@ import {
   logoutUser,
   toggleFollowController,
   getUserProfileController,
-  getNotificationsController
+  getNotificationsController,
+  updateProfileController
 } from "../controllers/authController";
 
 const router = express.Router();
@@ -37,6 +38,12 @@ router.get(
   "/notifications",
   protect,
   getNotificationsController
+);
+
+router.patch(
+  "/profile/update",
+  protect,
+  updateProfileController
 );
 
 export default router;

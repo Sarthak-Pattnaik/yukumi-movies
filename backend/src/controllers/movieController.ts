@@ -708,7 +708,7 @@ export const toggleReviewLikeController =
     }
   };
 
-export const getFeedController =
+export const getCommunityController =
   async (
     req: AuthRequest,
     res: Response
@@ -729,7 +729,7 @@ export const getFeedController =
         });
       }
 
-      const feed =
+      const community =
         await Activity.find({
 
           userId: {
@@ -749,10 +749,10 @@ export const getFeedController =
             "username"
           );
 
-      const enrichedFeed =
+      const enrichedCommunity =
         await Promise.all(
 
-          feed.map(
+          community.map(
             async (activity) => {
 
               let movie = null;
@@ -786,7 +786,7 @@ export const getFeedController =
         );
 
       res.status(200).json(
-        enrichedFeed
+        enrichedCommunity
       );
 
     } catch (error) {
