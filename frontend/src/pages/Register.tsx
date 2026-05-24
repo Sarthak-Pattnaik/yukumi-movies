@@ -4,6 +4,7 @@ import AuthLayout
   from "../components/layout/AuthLayout";
 import api from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
 
 const Register = () => {
 
@@ -17,6 +18,13 @@ const Register = () => {
     useState("");
 
   const navigate = useNavigate();
+
+  const login =
+    useAuthStore(
+      (state) =>
+        state.login
+    );
+
 
   const handleRegister = async (
     e: React.FormEvent
@@ -35,9 +43,8 @@ const Register = () => {
         }
       );
 
-      console.log(res.data);
-
       alert("User registered");
+      login(res.data);
       navigate("/profile");
 
     } catch (error: any) {

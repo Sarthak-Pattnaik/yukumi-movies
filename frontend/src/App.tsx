@@ -6,7 +6,7 @@ import {
 
 import { useEffect } from "react";
 
-import useAuthStore from "./store/authStore";
+import {  useAuthStore } from "./store/authStore";
 import Navbar from "./components/layout/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -21,11 +21,36 @@ import Community from "./pages/Community";
 
 function App() {
 
-  const { checkAuth } = useAuthStore();
+  const checkAuth =
+  useAuthStore(
+    (state) =>
+      state.checkAuth
+  );
+
+const loading =
+  useAuthStore(
+    (state) =>
+      state.loading
+  );
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  if (loading) {
+
+  return (
+
+    <div
+      className="flex min-h-screen items-center justify-center bg-[#0f0f0f] text-zinc-500"
+    >
+
+      Loading...
+
+    </div>
+
+  );
+}
 
   return (
     <BrowserRouter>

@@ -4,6 +4,9 @@ import { AuthRequest } from "../middleware/authMiddleware";
 
 import User from "../models/User";
 import Notification from "../models/Notification";
+import Review from "../models/Review";
+import Activity from "../models/Activity";
+import UserMovie from "../models/UserMovie";
 
 export const registerUser = async (
   req: Request,
@@ -91,9 +94,22 @@ export const loginUser = async (
       message: "Login successful",
 
       user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
+        _id: user._id,
+
+        username:
+          user.username,
+
+        email:
+          user.email,
+
+        avatar:
+          user.avatar,
+
+        tagline:
+          user.tagline,
+
+        bio:
+          user.bio,
       },
     });
 
@@ -269,9 +285,21 @@ export const getUserProfileController =
       const user =
         await User.findById(
           req.params.id
-        ).select(
-          "-password"
-        );
+        )
+
+          .select(
+            "-password"
+          )
+
+          .populate(
+            "followers",
+            "username avatar"
+          )
+
+          .populate(
+            "following",
+            "username avatar"
+          );
 
       if (!user) {
 
@@ -281,14 +309,100 @@ export const getUserProfileController =
         });
       }
 
-      res.status(200).json(user);
+      const recentReviews =
+        await Review.find({
+
+          userId:
+            user._id,
+        })
+
+          .sort({
+            createdAt: -1,
+          })
+
+          .limit(4);
+
+      const favoriteMovies =
+        await UserMovie.find({
+
+          userId:
+            user._id,
+
+          favorite: true,
+        }).limit(6);
+
+      const recentActivity =
+        await Activity.find({
+
+          userId:
+            user._id,
+        })
+
+          .sort({
+            createdAt: -1,
+          })
+
+          .limit(6);
+
+      const watchedCount =
+        await UserMovie.countDocuments({
+
+          userId:
+            user._id,
+
+          status:
+            "completed",
+        });
+
+      const profileData = {
+
+        _id:
+          user._id,
+
+        username:
+          user.username,
+
+        email:
+          user.email,
+
+        avatar:
+          user.avatar,
+
+        tagline:
+          user.tagline,
+
+        bio:
+          user.bio,
+
+        followers:
+          user.followers,
+
+        following:
+          user.following,
+
+        createdAt:
+          user.createdAt,
+
+        recentReviews,
+
+        favoriteMovies,
+
+        recentActivity,
+
+        watchedCount,
+      };
+
+      res.status(200).json(
+        profileData
+      );
 
     } catch (error) {
 
       console.log(error);
 
       res.status(500).json({
-        message: "Server error",
+        message:
+          "Server error",
       });
 
     }
@@ -376,4 +490,27 @@ export const updateProfileController =
       });
 
     }
+  };
+
+export const logoutController =
+  (
+    req: Request,
+    res: Response
+  ) => {
+
+    res.cookie(
+      "token",
+      "",
+      {
+        httpOnly: true,
+
+        expires:
+          new Date(0),
+      }
+    );
+
+    res.status(200).json({
+      message:
+        "Logged out",
+    });
   };

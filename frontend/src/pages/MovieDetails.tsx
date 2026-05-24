@@ -330,8 +330,23 @@ const MovieDetails = () => {
 
         await api.post(
           "/movies/list",
+
           {
-            movieId: movie.id,
+
+            movie: {
+
+              id:
+                movie.id,
+
+              title:
+                movie.title,
+
+              poster_path:
+                movie.poster_path,
+
+              backdrop_path:
+                movie.backdrop_path,
+            },
 
             status:
               "plan_to_watch",
@@ -361,8 +376,22 @@ const MovieDetails = () => {
 
         await api.post(
           "/movies/reviews",
+
           {
-            movieId: movie.id,
+            movie: {
+
+              id:
+                movie.id,
+
+              title:
+                movie.title,
+
+              poster_path:
+                movie.poster_path,
+
+              backdrop_path:
+                movie.backdrop_path,
+            },
 
             reviewText,
           }

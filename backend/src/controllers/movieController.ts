@@ -6,6 +6,9 @@ import Review from "../models/Review";
 import Activity from "../models/Activity";
 import Notification from "../models/Notification";
 import { AuthRequest } from "../middleware/authMiddleware";
+import {
+  Types,
+} from "mongoose";
 
 
 export const searchMovieController =
@@ -76,17 +79,24 @@ export const addToListController =
     try {
 
       const {
-        movieId,
+
+        movie,
+
         status,
+
         rating,
+
         favorite,
       } = req.body;
 
       const existingEntry =
         await UserMovie.findOne({
-          userId: req.userId,
 
-          movieId,
+          userId:
+            req.userId,
+
+          "movie.id":
+            movie.id,
         });
 
       if (existingEntry) {
@@ -100,9 +110,10 @@ export const addToListController =
       const entry =
         await UserMovie.create({
 
-          userId: req.userId,
+          userId:
+            req.userId,
 
-          movieId,
+          movie,
 
           status,
 
@@ -111,14 +122,48 @@ export const addToListController =
           favorite,
         });
 
-      res.status(201).json(entry);
+      if (
+        status ===
+        "completed"
+      ) {
+
+        await Activity.create({
+
+          userId:
+            req.userId,
+
+          type:
+            "completed",
+
+          movie,
+        });
+      }
+
+      if (favorite) {
+
+        await Activity.create({
+
+          userId:
+            req.userId,
+
+          type:
+            "favorite",
+
+          movie,
+        });
+      }
+
+      res.status(201).json(
+        entry
+      );
 
     } catch (error) {
 
       console.log(error);
 
       res.status(500).json({
-        message: "Server error",
+        message:
+          "Server error",
       });
 
     }
@@ -134,44 +179,41 @@ export const getUserMoviesController =
 
       const userMovies =
         await UserMovie.find({
-          userId: req.userId,
-        });
 
-      const enrichedMovies =
-        await Promise.all(
+          userId:
+            req.userId,
+        })
 
-          userMovies.map(
-            async (entry) => {
+          .sort({
+            updatedAt: -1,
+          });
 
-              const details =
-                await getMovieDetails(
-                  entry.movieId.toString()
-                );
+      const formattedMovies =
+        userMovies.map(
+          (entry) => ({
 
-              return {
+            _id:
+              entry._id,
 
-                _id: entry._id,
+            status:
+              entry.status,
 
-                movieId:
-                  entry.movieId,
+            rating:
+              entry.rating,
 
-                status:
-                  entry.status,
+            favorite:
+              entry.favorite,
 
-                rating:
-                  entry.rating,
+            movie:
+              entry.movie,
 
-                favorite:
-                  entry.favorite,
-
-                movie: details,
-              };
-            }
-          )
+            updatedAt:
+              entry.updatedAt,
+          })
         );
 
       res.status(200).json(
-        enrichedMovies
+        formattedMovies
       );
 
     } catch (error) {
@@ -179,7 +221,8 @@ export const getUserMoviesController =
       console.log(error);
 
       res.status(500).json({
-        message: "Server error",
+        message:
+          "Server error",
       });
 
     }
@@ -193,7 +236,8 @@ export const updateUserMovieController =
 
     try {
 
-      const { id } = req.params;
+      const { id } =
+        req.params;
 
       const {
         status,
@@ -207,7 +251,8 @@ export const updateUserMovieController =
           {
             _id: id,
 
-            userId: req.userId,
+            userId:
+              req.userId,
           },
 
           {
@@ -229,42 +274,66 @@ export const updateUserMovieController =
         });
       }
 
+      const existingMovie =
+        await UserMovie.findOne({
+          _id: id,
+          userId: req.userId,
+        });
+
+      if (
+
+        existingMovie?.status !==
+        "completed"
+
+        &&
+
+        status ===
+        "completed"
+      ) {
+
+        await Activity.create({
+
+          userId:
+            req.userId,
+
+          type:
+            "completed",
+
+          movie:
+            updatedMovie.movie,
+        });
+      }
+
+
+      if (
+        !existingMovie?.favorite &&
+        favorite
+      ) {
+
+        await Activity.create({
+
+          userId:
+            req.userId,
+
+          type:
+            "favorite",
+
+          movie:
+            updatedMovie.movie,
+        });
+      }
+
       res.status(200).json(
         updatedMovie
       );
-
-      if (status === "completed") {
-
-        await Activity.create({
-
-          userId: req.userId,
-
-          type: "completed",
-
-          movieId:
-            updatedMovie.movieId,
-        });
-      }
-
-      if (favorite) {
-
-        await Activity.create({
-
-          userId: req.userId,
-
-          type: "favorite",
-
-          movieId:
-            updatedMovie.movieId,
-        });
-      }
 
     } catch (error) {
 
       console.log(error);
 
       res.status(500).json({
-        message: "Server error",
+        message:
+          "Server error",
       });
 
     }
@@ -321,7 +390,7 @@ export const addReviewController =
     try {
 
       const {
-        movieId,
+        movie,
         reviewText,
       } = req.body;
 
@@ -330,14 +399,10 @@ export const addReviewController =
 
           userId: req.userId,
 
-          movieId,
+          movie,
 
           reviewText,
         });
-
-      res.status(201).json(
-        review
-      );
 
       await Activity.create({
 
@@ -345,17 +410,22 @@ export const addReviewController =
 
         type: "review",
 
-        movieId,
+        movie,
 
         text: reviewText,
       });
+
+      res.status(201).json(
+        review
+      );
 
     } catch (error) {
 
       console.log(error);
 
       res.status(500).json({
-        message: "Server error",
+        message:
+          "Server error",
       });
 
     }
@@ -370,36 +440,53 @@ export const getMovieReviewsController =
     try {
 
       const movieId =
-        Number(req.params.movieId);
+        Number(
+          req.params.movieId
+        );
 
       const reviews =
         await Review.find({
-          movieId,
-        }).populate(
-          "userId",
-          "username"
-        );
+
+          "movie.id":
+            movieId,
+        })
+
+          .populate(
+            "userId",
+            "username avatar"
+          )
+
+          .sort({
+            createdAt: -1,
+          });
 
       const formattedReviews =
-        reviews.map((review) => ({
+        reviews.map(
+          (review) => ({
 
-          _id: review._id,
+            _id:
+              review._id,
 
-          reviewText:
-            review.reviewText,
+            movie:
+              review.movie,
 
-          createdAt:
-            review.createdAt,
+            reviewText:
+              review.reviewText,
 
-          likes:
-            review.likes,
+            createdAt:
+              review.createdAt,
 
-          likeCount:
-            review.likes.length,
+            likes:
+              review.likes,
 
-          userId:
-            review.userId,
-        }));
+            likeCount:
+              review.likes
+                .length,
+
+            userId:
+              review.userId,
+          })
+        );
 
       res.status(200).json(
         formattedReviews
@@ -410,7 +497,8 @@ export const getMovieReviewsController =
       console.log(error);
 
       res.status(500).json({
-        message: "Server error",
+        message:
+          "Server error",
       });
 
     }
@@ -729,12 +817,20 @@ export const getCommunityController =
         });
       }
 
+      const communityUserIds = [
+
+        ...(user.following || []),
+
+        req.userId,
+      ].filter(Boolean);
+
       const community =
         await Activity.find({
 
           userId: {
+
             $in:
-              user.following,
+              communityUserIds as Types.ObjectId[],
           },
         })
 
@@ -746,47 +842,35 @@ export const getCommunityController =
 
           .populate(
             "userId",
-            "username"
+            "username avatar"
           );
 
-      const enrichedCommunity =
-        await Promise.all(
+      const formattedCommunity =
+        community.map(
+          (activity) => ({
 
-          community.map(
-            async (activity) => {
+            _id:
+              activity._id,
 
-              let movie = null;
+            type:
+              activity.type,
 
-              if (activity.movieId) {
+            text:
+              activity.text,
 
-                movie =
-                  await getMovieDetails(
-                    activity.movieId.toString()
-                  );
-              }
+            createdAt:
+              activity.createdAt,
 
-              return {
+            movie:
+              activity.movie,
 
-                _id: activity._id,
-
-                type: activity.type,
-
-                text: activity.text,
-
-                createdAt:
-                  activity.createdAt,
-
-                movie,
-
-                user:
-                  activity.userId,
-              };
-            }
-          )
+            user:
+              activity.userId,
+          })
         );
 
       res.status(200).json(
-        enrichedCommunity
+        formattedCommunity
       );
 
     } catch (error) {
@@ -794,7 +878,8 @@ export const getCommunityController =
       console.log(error);
 
       res.status(500).json({
-        message: "Server error",
+        message:
+          "Server error",
       });
 
     }

@@ -1,35 +1,59 @@
 import { useState } from "react";
 
-import useAuthStore from "../store/authStore";
+import { useAuthStore }from "../store/authStore";
 import AuthLayout from "../components/layout/AuthLayout";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const Login = () => {
 
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const [email, setEmail] =
     useState("");
 
-  const [password, setPassword] =
-    useState("");
+  const [
+    password,
+    setPassword,
+  ] = useState("");
 
-  const { login } =
-    useAuthStore();
-
-  const handleLogin = async (
-    e: React.FormEvent
-  ) => {
-
-    e.preventDefault();
-
-    await login(
-      email,
-      password
+  const login =
+    useAuthStore(
+      (state) =>
+        state.login
     );
 
-    navigate("/profile");
-  };
+  const handleLogin =
+    async (
+      e: React.FormEvent
+    ) => {
+
+      e.preventDefault();
+
+      try {
+
+        const res =
+          await api.post(
+            "/auth/login",
+
+            {
+              email,
+              password,
+            }
+          );
+
+        login(res.data);
+
+        navigate(
+          "/profile"
+        );
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
 
   return (
 

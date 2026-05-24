@@ -24,10 +24,25 @@ const activitySchema =
       required: true,
     },
 
-    movieId: {
-      type: Number,
+    movie: {
 
-      required: true,
+      id: {
+        type: Number,
+        required: true,
+      },
+
+      title: {
+        type: String,
+        required: true,
+      },
+
+      poster_path: {
+        type: String,
+      },
+
+      backdrop_path: {
+        type: String,
+      },
     },
 
     text: {

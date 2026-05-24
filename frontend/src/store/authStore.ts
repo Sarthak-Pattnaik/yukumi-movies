@@ -1,113 +1,100 @@
-import { create } from "zustand";
+import {
+  create,
+} from "zustand";
 
-import api from "../services/api";
+import api
+from "../services/api";
 
-interface User {
+type User = {
+
   _id: string;
-  username: string;
-  email: string;
-}
 
-interface AuthStore {
+  username: string;
+
+  email: string;
+
+  avatar?: string;
+
+  tagline?: string;
+
+  bio?: string;
+};
+
+type AuthStore = {
 
   user: User | null;
 
-  loading: boolean;
-
   isAuthenticated: boolean;
 
-  login: (
-    email: string,
-    password: string
-  ) => Promise<void>;
+  loading: boolean;
 
-  logout: () => Promise<void>;
+  login: (
+    user: User
+  ) => void;
+
+  logout: () => void;
 
   checkAuth: () => Promise<void>;
-}
+};
 
-const useAuthStore = create<AuthStore>(
-  (set) => ({
+export const useAuthStore =
+  create<AuthStore>(
+    (set) => ({
 
-    user: null,
+      user: null,
 
-    loading: true,
+      isAuthenticated: false,
 
-    isAuthenticated: false,
+      loading: true,
 
-    login: async (
-      email,
-      password
-    ) => {
+      login: (user) =>
 
-      try {
+        set({
 
-        const res = await api.post(
-          "/auth/login",
-          {
-            email,
-            password,
+          user,
+
+          isAuthenticated: true,
+        }),
+
+      logout: () =>
+
+        set({
+
+          user: null,
+
+          isAuthenticated: false,
+        }),
+
+      checkAuth:
+        async () => {
+
+          try {
+
+            const res =
+              await api.get(
+                "/auth/me"
+              );
+
+            set({
+
+              user: res.data,
+
+              isAuthenticated: true,
+
+              loading: false,
+            });
+
+          } catch {
+
+            set({
+
+              user: null,
+
+              isAuthenticated: false,
+
+              loading: false,
+            });
           }
-        );
-
-        set({
-          user: res.data.user,
-
-          isAuthenticated: true,
-        });
-
-      } catch (error) {
-
-        console.log(error);
-      }
-    },
-
-    logout: async () => {
-
-      try {
-
-        await api.post("/auth/logout");
-
-        set({
-          user: null,
-
-          isAuthenticated: false,
-        });
-
-      } catch (error) {
-
-        console.log(error);
-      }
-    },
-
-    checkAuth: async () => {
-
-      try {
-
-        const res = await api.get(
-          "/auth/me"
-        );
-
-        set({
-          user: res.data,
-
-          isAuthenticated: true,
-
-          loading: false,
-        });
-
-      } catch (error) {
-
-        set({
-          user: null,
-
-          isAuthenticated: false,
-
-          loading: false,
-        });
-      }
-    },
-  })
-);
-
-export default useAuthStore;
+        },
+    })
+  );
