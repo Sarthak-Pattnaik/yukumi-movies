@@ -11,7 +11,8 @@ import {
   getUserProfileController,
   getNotificationsController,
   updateProfileController,
-  logoutController
+  logoutController,
+  searchUsersController
 } from "../controllers/authController";
 
 const router = express.Router();
@@ -51,5 +52,12 @@ router.post(
   "/logout",
   logoutController
 );
+
+router.get(
+  "/search/users",
+  protect,
+  searchUsersController
+);
+
 
 export default router;

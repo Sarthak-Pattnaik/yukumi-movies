@@ -21,12 +21,32 @@ import StatCard
 
 import MovieCard from "../components/movie/MovieCard";
 
+import {
+  useAuthStore,
+} from "../store/authStore";
+
 const UserProfile = () => {
 
   const { id } = useParams();
 
+  const currentUser =
+    useAuthStore(
+      (state) =>
+        state.user
+    );
+
   const [user, setUser] =
     useState<any>(null);
+
+  const isFollowing =
+    user?.followers?.some(
+      (
+        follower: any
+      ) =>
+
+        follower._id ===
+        currentUser?._id
+    );
 
   const fetchUser =
     async () => {
@@ -163,10 +183,20 @@ const UserProfile = () => {
           <button
             onClick={handleFollow}
 
-            className="rounded-2xl bg-[#10b981] px-8 py-4 text-lg font-semibold text-black transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(16,185,129,0.25)]"
+            className={`rounded-2xl px-8 py-4 text-lg font-semibold transition-all duration-300 hover:scale-[1.03]
+
+    ${isFollowing
+
+                ? "border border-zinc-700 bg-black/40 text-white hover:border-red-500 hover:text-red-400"
+
+                : "bg-[#10b981] text-black hover:shadow-[0_0_30px_rgba(16,185,129,0.25)]"
+              }
+  `}
           >
 
-            Follow / Unfollow
+            {isFollowing
+              ? "Unfollow"
+              : "Follow"}
 
           </button>
 

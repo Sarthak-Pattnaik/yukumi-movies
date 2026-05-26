@@ -15,6 +15,34 @@ import SectionTitle
 
 import api from "../services/api";
 
+import {
+
+  Dialog,
+
+  DialogContent,
+
+  DialogHeader,
+
+  DialogTitle,
+
+} from
+  "../components/ui/dialog";
+
+import {
+
+  Select,
+
+  SelectContent,
+
+  SelectItem,
+
+  SelectTrigger,
+
+  SelectValue,
+
+} from
+  "../components/ui/select";
+
 const ReviewCard = ({
   review,
   fetchReviews,
@@ -282,6 +310,75 @@ const MovieDetails = () => {
   const [reviews, setReviews] =
     useState<any[]>([]);
 
+  const [
+    openDialog,
+    setOpenDialog,
+  ] = useState(false);
+
+  const [
+    existingEntry,
+    setExistingEntry,
+  ] = useState<any>(null);
+
+  const [
+    status,
+    setStatus,
+  ] = useState(
+    "plan_to_watch"
+  );
+
+  const [
+    rating,
+    setRating,
+  ] = useState(0);
+
+  const [
+    favorite,
+    setFavorite,
+  ] = useState(false);
+
+  const fetchUserEntry =
+    async () => {
+
+      try {
+
+        const res =
+          await api.get(
+            "/movies/user/list"
+          );
+
+        const entry =
+          res.data.find(
+            (item: any) =>
+              item.movie.id ===
+              Number(id)
+          );
+
+        if (entry) {
+
+          setExistingEntry(
+            entry
+          );
+
+          setStatus(
+            entry.status
+          );
+
+          setRating(
+            entry.rating
+          );
+
+          setFavorite(
+            entry.favorite
+          );
+        }
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
   const fetchReviews =
     async () => {
 
@@ -319,55 +416,71 @@ const MovieDetails = () => {
     };
 
     fetchMovie();
+    fetchUserEntry();
     fetchReviews();
 
   }, [id]);
 
-  const handleAddToList =
-    async () => {
+  const handleSaveEntry =
+  async () => {
 
-      try {
+    try {
+
+      const payload = {
+
+        movie: {
+
+          id:
+            movie.id,
+
+          title:
+            movie.title,
+
+          poster_path:
+            movie.poster_path,
+
+          backdrop_path:
+            movie.backdrop_path,
+        },
+
+        status,
+
+        rating,
+
+        favorite,
+      };
+
+      if (
+        existingEntry
+      ) {
+
+        await api.patch(
+
+          `/movies/user/list/${existingEntry._id}`,
+
+          payload
+        );
+
+      } else {
 
         await api.post(
           "/movies/list",
 
-          {
-
-            movie: {
-
-              id:
-                movie.id,
-
-              title:
-                movie.title,
-
-              poster_path:
-                movie.poster_path,
-
-              backdrop_path:
-                movie.backdrop_path,
-            },
-
-            status:
-              "plan_to_watch",
-
-            rating: 8,
-          }
-        );
-
-        alert(
-          "Movie added to list"
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-        alert(
-          "Failed to add movie"
+          payload
         );
       }
-    };
+
+      fetchUserEntry();
+
+      setOpenDialog(
+        false
+      );
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
 
   const handleSubmitReview =
     async () => {
@@ -542,11 +655,17 @@ const MovieDetails = () => {
               </div>
 
               <button
-                className="emerald-button"
-                onClick={handleAddToList}
+
+                onClick={() =>
+                  setOpenDialog(true)
+                }
+
+                className="emerald-button px-8 py-4 text-lg"
               >
 
-                Add To List
+                {existingEntry
+                  ? "Edit Entry"
+                  : "Add To List"}
 
               </button>
 
@@ -557,6 +676,163 @@ const MovieDetails = () => {
         </div>
 
       </section>
+
+      <Dialog
+        open={openDialog}
+
+        onOpenChange={
+          setOpenDialog
+        }
+      >
+
+        <DialogContent
+          className="border-zinc-800 bg-[#171717] text-white"
+        >
+
+          <DialogHeader>
+
+            <DialogTitle
+              className="text-3xl font-bold"
+            >
+
+              {existingEntry
+                ? "Edit Entry"
+                : "Add To List"}
+
+            </DialogTitle>
+
+          </DialogHeader>
+
+          <div
+            className="space-y-6 pt-6"
+          >
+
+            <div>
+
+              <p
+                className="mb-3 text-sm uppercase tracking-[0.2em] text-zinc-500"
+              >
+
+                Status
+
+              </p>
+
+              <Select
+                value={status}
+
+                onValueChange={
+                  setStatus
+                }
+              >
+
+                <SelectTrigger
+                  className="border-zinc-700 bg-black/40"
+                >
+
+                  <SelectValue />
+
+                </SelectTrigger>
+
+                <SelectContent
+                  className="border-zinc-700 bg-[#171717] text-white"
+                >
+
+                  <SelectItem value="watching">
+                    Watching
+                  </SelectItem>
+
+                  <SelectItem value="completed">
+                    Completed
+                  </SelectItem>
+
+                  <SelectItem value="on_hold">
+                    On Hold
+                  </SelectItem>
+
+                  <SelectItem value="dropped">
+                    Dropped
+                  </SelectItem>
+
+                  <SelectItem value="plan_to_watch">
+                    Plan To Watch
+                  </SelectItem>
+
+                </SelectContent>
+
+              </Select>
+
+            </div>
+
+            <div>
+
+              <p
+                className="mb-3 text-sm uppercase tracking-[0.2em] text-zinc-500"
+              >
+
+                Score
+
+              </p>
+
+              <input
+                type="number"
+
+                min={0}
+
+                max={10}
+
+                value={rating}
+
+                onChange={(e) =>
+                  setRating(
+                    Number(
+                      e.target.value
+                    )
+                  )
+                }
+
+                className="auth-input"
+              />
+
+            </div>
+
+            <label
+              className="flex items-center gap-3 text-zinc-300"
+            >
+
+              <input
+                type="checkbox"
+
+                checked={favorite}
+
+                onChange={(e) =>
+                  setFavorite(
+                    e.target.checked
+                  )
+                }
+              />
+
+              Favorite
+
+            </label>
+
+            <button
+
+              onClick={
+                handleSaveEntry
+              }
+
+              className="emerald-button h-14 w-full text-lg"
+            >
+
+              Save Entry
+
+            </button>
+
+          </div>
+
+        </DialogContent>
+
+      </Dialog>
 
       <section
         className="mt-20 space-y-20"

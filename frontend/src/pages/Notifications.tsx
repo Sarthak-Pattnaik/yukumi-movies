@@ -11,6 +11,8 @@ import SectionTitle
 
 import api from "../services/api";
 
+import { Link } from "react-router-dom";
+
 const Notifications = () => {
 
   const [
@@ -115,8 +117,11 @@ const Notifications = () => {
                   className="flex items-center justify-between"
                 >
 
-                  <div
-                    className="flex items-center gap-5"
+                  <Link
+
+                    to={`/users/${notification.senderId?._id}`}
+
+                    className="mb-5 flex w-fit items-center gap-4"
                   >
 
                     <div
@@ -132,8 +137,8 @@ const Notifications = () => {
 
                     </div>
 
-                    <div>
 
+                    <div>
                       <h3
                         className="mb-1 text-xl font-semibold tracking-tight text-white"
                       >
@@ -159,18 +164,12 @@ const Notifications = () => {
                           "liked your review"}
 
                       </p>
-
                     </div>
 
-                  </div>
 
-                  <div
-                    className="rounded-full border border-zinc-700 bg-black/40 px-4 py-2 text-xs uppercase tracking-[0.2em] text-zinc-500"
-                  >
+                  </Link>
 
-                    {notification.type}
-
-                  </div>
+              
 
                 </div>
 
@@ -182,7 +181,7 @@ const Notifications = () => {
         </div>
       </section>
 
-    </PageWrapper>
+    </PageWrapper >
   );
 };
 

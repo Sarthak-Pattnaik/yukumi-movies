@@ -13,7 +13,7 @@ import {
   deleteReviewController,
   getUserStatsController,
   toggleReviewLikeController,
-  getCommunityController
+  getCommunityController,
 } from "../controllers/movieController";
 
 import protect from "../middleware/authMiddleware";
@@ -89,6 +89,7 @@ router.get(
   protect,
   getCommunityController
 );
+
 
 router.get(
   "/:id",

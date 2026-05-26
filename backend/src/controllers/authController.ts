@@ -7,7 +7,7 @@ import Notification from "../models/Notification";
 import Review from "../models/Review";
 import Activity from "../models/Activity";
 import UserMovie from "../models/UserMovie";
-
+import mongoose from "mongoose";
 export const registerUser = async (
   req: Request,
   res: Response
@@ -513,4 +513,56 @@ export const logoutController =
       message:
         "Logged out",
     });
+  };
+
+export const searchUsersController =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+
+    try {
+
+      const query =
+        req.query.q as string;
+
+      const users =
+        await User.find({
+
+          _id: {
+
+            $ne:
+              new mongoose.Types.ObjectId(
+                req.userId
+              ),
+          },
+
+          username: {
+
+            $regex: query,
+
+            $options: "i",
+          },
+        })
+
+          .select(
+            "username avatar tagline"
+          )
+
+          .limit(10);
+
+      res.status(200).json(
+        users
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message:
+          "Server error",
+      });
+
+    }
   };

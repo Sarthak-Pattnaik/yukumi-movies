@@ -2,7 +2,9 @@ import {
   useEffect,
   useState,
 } from "react";
-
+import {
+  Link,
+} from "react-router-dom";
 import PageWrapper
   from "../components/layout/PageWrapper";
 
@@ -11,10 +13,60 @@ import SectionTitle
 
 import api from "../services/api";
 
+import {
+  useNavigate,
+} from "react-router-dom";
+
+import {
+
+  Dialog,
+
+  DialogContent,
+
+  DialogHeader,
+
+  DialogTitle,
+
+} from "../components/ui/dialog";
+
+import {
+
+  Command,
+
+  CommandEmpty,
+
+  CommandGroup,
+
+  CommandInput,
+
+  CommandItem,
+
+  CommandList,
+
+} from "../components/ui/command";
+
 const Community = () => {
 
   const [activities, setActivities] =
     useState<any[]>([]);
+
+  const navigate =
+    useNavigate();
+
+  const [
+    openSearch,
+    setOpenSearch,
+  ] = useState(false);
+
+  const [
+    search,
+    setSearch,
+  ] = useState("");
+
+  const [
+    users,
+    setUsers,
+  ] = useState<any[]>([]);
 
   useEffect(() => {
 
@@ -41,6 +93,61 @@ const Community = () => {
     fetchCommunity();
 
   }, []);
+
+  const searchUsers =
+    async (
+      query: string
+    ) => {
+
+      try {
+
+        if (!query.trim()) {
+
+          setUsers([]);
+
+          return;
+        }
+
+        const res =
+          await api.get(
+
+            `/auth/search/users?q=${query}`
+          );
+
+        setUsers(
+          res.data
+        );
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
+  useEffect(() => {
+
+    if (
+      search.trim().length < 1
+    ) {
+
+      setUsers([]);
+
+      return;
+    }
+
+    const timeout =
+      setTimeout(() => {
+
+        searchUsers(
+          search
+        );
+
+      }, 150);
+
+    return () =>
+      clearTimeout(timeout);
+
+  }, [search]);
 
   return (
 
@@ -88,6 +195,144 @@ const Community = () => {
 
         </div>
 
+        <button
+
+          onClick={() => {
+            setOpenSearch(true);
+          }}
+
+          className="relative z-20 mt-12 cursor-pointer rounded-2xl border border-zinc-700 bg-black/40 px-6 py-3 text-sm font-semibold text-zinc-300 transition-all duration-300 hover:border-[#10b981] hover:text-white"
+        >
+
+          Search Users
+
+        </button>
+
+        <Dialog
+          open={openSearch}
+
+          onOpenChange={
+            setOpenSearch
+          }
+        >
+
+          <DialogContent
+            className="border-zinc-800 bg-[#171717] text-white"
+          >
+
+            <DialogHeader>
+
+              <DialogTitle
+                className="text-3xl font-bold"
+              >
+
+                Discover Users
+
+              </DialogTitle>
+
+            </DialogHeader>
+
+            <Command
+
+              shouldFilter={false}
+
+              className="mt-6 rounded-2xl border border-zinc-800 bg-black/40"
+            >
+
+              <CommandInput
+
+                placeholder="Search users..."
+
+                onValueChange={
+                  setSearch
+                }
+              />
+
+              <CommandList
+                key={search}
+              >
+
+                <CommandEmpty>
+
+                  No users found.
+
+                </CommandEmpty>
+
+                <CommandGroup>
+
+                  {users.map(
+                    (user) => (
+
+                      <CommandItem
+
+                        key={user._id}
+
+                        onSelect={() => {
+
+                          navigate(
+                            `/users/${user._id}`
+                          );
+
+                          setOpenSearch(
+                            false
+                          );
+                        }}
+
+                        className="cursor-pointer"
+                      >
+
+                        <div
+                          className="flex items-center gap-4"
+                        >
+
+                          <div
+                            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#10b981]/15 font-bold text-[#10b981]"
+                          >
+
+                            {user.username?.[0]?.toUpperCase()}
+
+                          </div>
+
+                          <div>
+
+                            <p
+                              className="font-medium"
+                            >
+
+                              {
+                                user.username
+                              }
+
+                            </p>
+
+                            <p
+                              className="text-sm text-zinc-500"
+                            >
+
+                              {
+                                user.tagline
+                              }
+
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                      </CommandItem>
+                    )
+                  )}
+
+                </CommandGroup>
+
+              </CommandList>
+
+            </Command>
+
+          </DialogContent>
+
+        </Dialog>
+
       </section>
 
       <section
@@ -104,10 +349,13 @@ const Community = () => {
           {activities.map(
             (activity) => (
 
-              <div
+              <Link
+
                 key={activity._id}
 
-                className="group overflow-hidden rounded-[2rem] border border-zinc-800 bg-[#171717]/80 backdrop-blur-sm transition-all duration-300 hover:border-zinc-700 hover:bg-[#1b1b1b] hover:shadow-[0_0_40px_rgba(16,185,129,0.08)]"
+                to={`/movies/${activity.movie?.id}`}
+
+                className="block"
               >
 
                 <div
@@ -144,8 +392,15 @@ const Community = () => {
 
                     <div>
 
-                      <div
-                        className="mb-5 flex items-center gap-4"
+                      <Link
+
+                        to={`/users/${activity.user?._id}`}
+
+                        onClick={(e) =>
+                          e.stopPropagation()
+                        }
+
+                        className="mb-5 flex w-fit items-center gap-4"
                       >
 
                         <div
@@ -153,9 +408,14 @@ const Community = () => {
                         >
 
                           {
-                            activity.user
-                              ?.username?.[0]
-                              ?.toUpperCase()
+                            (
+                              activity.user?.avatar &&
+                              <img src={activity.user?.avatar}
+                                className="h-12 w-12 rounded-full"
+                              />
+                            )
+
+                            || activity.user?.username?.[0]?.toUpperCase()
                           }
 
                         </div>
@@ -183,7 +443,7 @@ const Community = () => {
 
                         </div>
 
-                      </div>
+                      </Link>
 
                       <p
                         className="mb-4 text-2xl font-bold leading-snug tracking-tight text-white"
@@ -248,7 +508,7 @@ const Community = () => {
 
                 </div>
 
-              </div>
+              </Link>
             )
           )}
 
@@ -283,6 +543,7 @@ const Community = () => {
         </div>
 
       )}
+
 
     </PageWrapper>
   );
