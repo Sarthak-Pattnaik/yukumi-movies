@@ -6,6 +6,7 @@ import Review from "../models/Review";
 import Activity from "../models/Activity";
 import Notification from "../models/Notification";
 import { AuthRequest } from "../middleware/authMiddleware";
+import axios from "axios";
 import {
   Types,
 } from "mongoose";
@@ -882,5 +883,104 @@ export const getCommunityController =
           "Server error",
       });
 
+    }
+  };
+
+export const getTrendingMoviesController =
+  async (
+    req: Request,
+    res: Response
+  ) => {
+
+    try {
+
+      const response =
+        await axios.get(
+
+          `https://my-tmdb-proxy.psarthak.workers.dev/3/trending/movie/week`,
+
+          {
+
+            params: {
+
+              api_key:
+                process.env
+                  .TMDB_API_KEY,
+            },
+          }
+        );
+
+      res.status(200).json(
+        response.data
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+
+        message:
+          "Failed to fetch trending movies",
+      });
+    }
+  };
+
+export const getPublicCommunityController =
+  async (
+    req: Request,
+    res: Response
+  ) => {
+
+    try {
+
+      const activities =
+        await Activity.find()
+
+          .sort({
+            createdAt: -1,
+          })
+
+          .limit(8)
+
+          .populate(
+            "userId",
+            "username avatar"
+          );
+
+      const formatted =
+        activities.map(
+          (activity) => ({
+
+            _id:
+              activity._id,
+
+            type:
+              activity.type,
+
+            text:
+              activity.text,
+
+            movie:
+              activity.movie,
+
+            user:
+              activity.userId,
+          })
+        );
+
+      res.status(200).json(
+        formatted
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+
+        message:
+          "Failed to fetch community preview",
+      });
     }
   };

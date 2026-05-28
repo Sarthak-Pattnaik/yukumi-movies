@@ -1,43 +1,24 @@
-import { useAuthStore } from "../store/authStore";
+import {
+  useAuthStore,
+} from "../store/authStore";
+
+import LoggedInHome
+from "../components/home/LoggedInHome";
+
+import PublicHome
+from "../components/home/PublicHome";
 
 const Home = () => {
 
-  const {
-    user,
-    isAuthenticated,
-    logout,
-  } = useAuthStore();
+  const currentUser =
+    useAuthStore(
+      (state) =>
+        state.user
+    );
 
-  return (
-
-    <div>
-
-      <h1>Home Page</h1>
-
-      {isAuthenticated ? (
-
-        <div>
-
-          <h2>
-            Welcome {user?.username}
-          </h2>
-
-          <button onClick={logout}>
-            Logout
-          </button>
-
-        </div>
-
-      ) : (
-
-        <h2>
-          Not Logged In
-        </h2>
-
-      )}
-
-    </div>
-  );
+  return currentUser
+    ? <LoggedInHome />
+    : <PublicHome />;
 };
 
 export default Home;

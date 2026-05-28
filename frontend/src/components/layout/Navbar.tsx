@@ -52,7 +52,7 @@ const Navbar = () => {
 
           Yukumi
           <span
-            className="text-emerald"
+            className="text-emerald-500"
           >
             Movies
           </span>

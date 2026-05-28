@@ -14,6 +14,8 @@ import {
   getUserStatsController,
   toggleReviewLikeController,
   getCommunityController,
+  getTrendingMoviesController,
+  getPublicCommunityController
 } from "../controllers/movieController";
 
 import protect from "../middleware/authMiddleware";
@@ -85,9 +87,19 @@ router.get(
 );
 
 router.get(
+  "/community",
+  getPublicCommunityController
+);
+
+router.get(
   "/community/activity",
   protect,
   getCommunityController
+);
+
+router.get(
+  "/trending",
+  getTrendingMoviesController
 );
 
 
