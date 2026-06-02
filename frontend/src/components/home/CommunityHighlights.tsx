@@ -1,18 +1,20 @@
 import {
   useEffect,
   useState,
+  
 } from "react";
 
 import {
   Link,
+  useNavigate,
 } from "react-router-dom";
 
 import api
-from "../../services/api";
+  from "../../services/api";
 
 const CommunityHighlights =
   () => {
-
+    const navigate = useNavigate();
     const [
       activities,
       setActivities,
@@ -92,13 +94,10 @@ const CommunityHighlights =
           {activities.map(
             (activity) => (
 
-              <Link
-
+              <div
                 key={activity._id}
-
-                to={`/movies/${activity.movie?.id}`}
-
-                className="group overflow-hidden rounded-[2rem] border border-zinc-800 bg-[#141414] transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_40px_rgba(16,185,129,0.08)]"
+                onClick={() => navigate(`/movies/${activity.movie?.id}`)}
+                className="group cursor-pointer overflow-hidden rounded-[2rem] border border-zinc-800 bg-[#141414] transition-all duration-300 hover:border-zinc-700 hover:shadow-[0_0_40px_rgba(16,185,129,0.08)]"
               >
 
                 <div
@@ -232,7 +231,7 @@ const CommunityHighlights =
 
                 </div>
 
-              </Link>
+              </div>
             )
           )}
 
@@ -240,6 +239,6 @@ const CommunityHighlights =
 
       </section>
     );
-};
+  };
 
 export default CommunityHighlights;
