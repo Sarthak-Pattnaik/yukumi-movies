@@ -6,7 +6,6 @@ import {
   registerUser,
   loginUser,
   getMe,
-  logoutUser,
   toggleFollowController,
   getUserProfileController,
   getNotificationsController,
@@ -23,7 +22,6 @@ router.post("/login", loginUser);
 
 router.get("/me", protect, getMe);
 
-router.post("/logout", logoutUser);
 
 router.patch(
   "/follow/:id",

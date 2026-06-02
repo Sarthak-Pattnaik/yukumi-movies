@@ -51,6 +51,10 @@ export const registerUser = async (
 import jwt from "jsonwebtoken";
 import generateToken from "../utils/generateToken";
 
+const isProduction =
+  process.env.NODE_ENV ===
+  "production";
+
 export const loginUser = async (
   req: Request,
   res: Response
@@ -79,14 +83,10 @@ export const loginUser = async (
     }
 
     const token = generateToken(user._id.toString());
-
     res.cookie("token", token, {
       httpOnly: true,
-
-      secure: false,
-
-      sameSite: "lax",
-
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -144,20 +144,6 @@ export const getMe = async (
   }
 };
 
-export const logoutUser = async (
-  req: Request,
-  res: Response
-) => {
-
-  res.cookie("token", "", {
-    httpOnly: true,
-    expires: new Date(0),
-  });
-
-  res.status(200).json({
-    message: "Logged out successfully",
-  });
-};
 
 export const toggleFollowController =
   async (
@@ -492,28 +478,24 @@ export const updateProfileController =
     }
   };
 
-export const logoutController =
-  (
-    req: Request,
-    res: Response
-  ) => {
+export const logoutController = (
+  req: Request,
+  res: Response
+) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction
+      ? "none"
+      : "lax",
+    expires: new Date(0),
+  });
 
-    res.cookie(
-      "token",
-      "",
-      {
-        httpOnly: true,
-
-        expires:
-          new Date(0),
-      }
-    );
-
-    res.status(200).json({
-      message:
-        "Logged out",
-    });
-  };
+  res.status(200).json({
+    message:
+      "Logged out successfully",
+  });
+};
 
 export const searchUsersController =
   async (
